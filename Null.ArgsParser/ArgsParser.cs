@@ -15,7 +15,7 @@ namespace Null.ArgsParser
 
         NotArgument
     }
-    public abstract class ArgumentElement : CommandElement
+    public abstract class ArgumentElement : ICommandElement
     {
         public abstract bool IgnoreCase { get; set; }
         public abstract bool IsTriggered(string txt);
@@ -27,16 +27,16 @@ namespace Null.ArgsParser
         public abstract string Name { get; }
         public virtual CommandElementType ArgumentType { get; } = CommandElementType.NotArgument;
     }
-    public interface CommandElement
+    public interface ICommandElement
     {
         bool IgnoreCase { get; set; }
         bool IsTriggered(string txt);
         bool TryParse(ref string[] args, ref int index);
         bool TryAssign(Type type, object instance);
     }
-    public interface CommandElementContainer : ICollection<CommandElement>
+    public interface ICommandElementContainer : ICollection<ICommandElement>
     {
-        CommandElement[] Elements { get; }
+        ICommandElement[] Elements { get; }
         void Parse(string[] args);
         T ToObject<T>();
     }
@@ -47,7 +47,7 @@ namespace Null.ArgsParser
 
         char triggerChar = '/';
         bool enabled = false;
-        bool parsed = false;
+        bool assignable = false;
 
         public override string Name { get => name; }
         public override bool IgnoreCase { get => ignoreCase; set => ignoreCase = value; }
@@ -57,7 +57,11 @@ namespace Null.ArgsParser
         public bool Enabled
         {
             get => enabled;
-            set => enabled = value;
+            set
+            {
+                assignable = true;
+                enabled = value;
+            }
         }
 
         public SwitchArgument() { }
@@ -65,10 +69,10 @@ namespace Null.ArgsParser
         {
             this.name = name;
         }
-        public SwitchArgument(string name, bool enabled)
+        public SwitchArgument(string name, bool enabled)    
         {
             this.name = name;
-            this.enabled = enabled;
+            this.Enabled = enabled;
         }
 
         public override bool IsTriggered(string txt)
@@ -82,10 +86,9 @@ namespace Null.ArgsParser
         {
             if (IsTriggered(args[index]))
             {
-                enabled = !enabled;
+                this.Enabled = !enabled;
 
                 index++;
-                parsed = true;
                 return true;
             }
 
@@ -93,7 +96,7 @@ namespace Null.ArgsParser
         }
         public override bool TryAssign(Type type, object instance)
         {
-            if (parsed)
+            if (assignable)
             {
                 FieldInfo fieldInfo = type.GetField(name);
                 if (fieldInfo != null)
@@ -116,7 +119,7 @@ namespace Null.ArgsParser
 
         char triggerChar = '-';
         string value = string.Empty;
-        bool parsed = false;
+        bool assignable = false;
 
         public override string Name { get => name; }
         public override bool IgnoreCase { get => ignoreCase; set => ignoreCase = value; }
@@ -126,7 +129,11 @@ namespace Null.ArgsParser
         public string Value
         {
             get => value;
-            set => this.value = value;
+            set
+            {
+                this.assignable = true;
+                this.value = value;
+            }
         }
 
         public PropertyArgument() { }
@@ -137,7 +144,7 @@ namespace Null.ArgsParser
         public PropertyArgument(string name, string value)
         {
             this.name = name;
-            this.value = value;
+            this.Value = value;
         }
 
         public override bool IsTriggered(string txt)
@@ -154,10 +161,9 @@ namespace Null.ArgsParser
                 index++;
                 if (index < args.Length)
                 {
-                    value = args[index];
+                    this.Value = args[index];
 
                     index++;
-                    parsed = true;
                     return true;
                 }
             }
@@ -166,7 +172,7 @@ namespace Null.ArgsParser
         }
         public override bool TryAssign(Type type, object instance)
         {
-            if (parsed)
+            if (assignable)
             {
                 FieldInfo fieldInfo = type.GetField(name);
                 if (fieldInfo != null)
@@ -190,7 +196,7 @@ namespace Null.ArgsParser
 
         char triggerChar = '=';
         string value = string.Empty;
-        bool parsed = false;
+        bool assignable = false;
 
         public override string Name { get => name; }
         public override bool IgnoreCase { get => ignoreCase; set => ignoreCase = value; }
@@ -200,7 +206,11 @@ namespace Null.ArgsParser
         public string Value
         {
             get => value;
-            set => this.value = value;
+            set
+            {
+                this.assignable = true;
+                this.value = value;
+            }
         }
 
         public FieldArgument() { }
@@ -211,7 +221,7 @@ namespace Null.ArgsParser
         public FieldArgument(string name, string value)
         {
             this.name = name;
-            this.value = value;
+            this.Value = value;
         }
 
         public override bool IsTriggered(string txt)
@@ -225,10 +235,9 @@ namespace Null.ArgsParser
         {
             if (IsTriggered(args[index]))
             {
-                value = args[index].Substring(name.Length + 1);
+                this.Value = args[index].Substring(name.Length + 1);
 
                 index++;
-                parsed = true;
                 return true;
             }
 
@@ -236,7 +245,7 @@ namespace Null.ArgsParser
         }
         public override bool TryAssign(Type type, object instance)
         {
-            if (parsed)
+            if (assignable)
             {
                 FieldInfo fieldInfo = type.GetField(name);
                 if (fieldInfo != null)
@@ -252,19 +261,19 @@ namespace Null.ArgsParser
             return false;
         }
     }
-    public class CommandLine : NamedArgumentElement, CommandElementContainer
+    public class CommandLine : NamedArgumentElement, ICommandElementContainer
     {
         string name = string.Empty;
         bool selfIgnoreCase = false;
         bool enabled;
-        bool parsed = false;
+        bool assignable = false;
 
-        List<CommandElement> cmdElements = new List<CommandElement>();
+        List<ICommandElement> cmdElements = new List<ICommandElement>();
         List<string> strContent = new List<string>();
 
         public override string Name { get => name; }
         public bool SelfIgnoreCase { get => selfIgnoreCase; set => selfIgnoreCase = value; }
-        public CommandElement[] Elements { get => cmdElements.ToArray(); }
+        public ICommandElement[] Elements { get => cmdElements.ToArray(); }
         public string ExContentName { get; set; } = "ExtraContent";
         public string[] ExtraContent { get => strContent.ToArray(); }
 
@@ -275,13 +284,13 @@ namespace Null.ArgsParser
             get
             {
                 bool ignoreCase = false;
-                foreach (CommandElement element in cmdElements)
+                foreach (ICommandElement element in cmdElements)
                     ignoreCase &= element.IgnoreCase;
                 return ignoreCase;
             }
             set
             {
-                foreach (CommandElement element in cmdElements)
+                foreach (ICommandElement element in cmdElements)
                     element.IgnoreCase = value;
             }
         }
@@ -290,13 +299,13 @@ namespace Null.ArgsParser
             get
             {
                 bool ignoreCase = selfIgnoreCase;
-                foreach (CommandElement element in cmdElements)
+                foreach (ICommandElement element in cmdElements)
                     ignoreCase &= element.IgnoreCase;
                 return ignoreCase;
             }
             set
             {
-                foreach (CommandElement element in cmdElements)
+                foreach (ICommandElement element in cmdElements)
                     element.IgnoreCase = value;
                 selfIgnoreCase = value;
             }
@@ -307,7 +316,7 @@ namespace Null.ArgsParser
         {
             this.name = name;
         }
-        public CommandLine(string name, params CommandElement[] args)
+        public CommandLine(string name, params ICommandElement[] args)
         {
             this.name = name;
             cmdElements.AddRange(args);
@@ -341,7 +350,7 @@ namespace Null.ArgsParser
                     }
                 }
 
-                this.parsed = true;
+                this.assignable = true;
                 return true;
             }
 
@@ -349,7 +358,7 @@ namespace Null.ArgsParser
         }
         public override bool TryAssign(Type type, object instance)
         {
-            if (parsed)
+            if (assignable)
             {
                 FieldInfo fieldInfo = type.GetField(name);
                 FieldInfo strCntntFieldInfo = type.GetField(ExContentName);
@@ -364,7 +373,7 @@ namespace Null.ArgsParser
                         else if (typeof(string[]) == strCntntFieldInfo.FieldType)
                             strCntntFieldInfo.SetValue(instance, strContent.ToArray());
 
-                        foreach (CommandElement element in cmdElements)
+                        foreach (ICommandElement element in cmdElements)
                         {
                             element.TryAssign(type, instance);
                         }
@@ -377,7 +386,7 @@ namespace Null.ArgsParser
             return false;
         }
 
-        public void Add(CommandElement argv)
+        public void Add(ICommandElement argv)
         {
             cmdElements.Add(argv);
         }
@@ -385,19 +394,19 @@ namespace Null.ArgsParser
         {
             cmdElements.Clear();
         }
-        public bool Contains(CommandElement argv)
+        public bool Contains(ICommandElement argv)
         {
             return cmdElements.Contains(argv);
         }
-        public void CopyTo(CommandElement[] array, int index)
+        public void CopyTo(ICommandElement[] array, int index)
         {
             cmdElements.CopyTo(array, index);
         }
-        bool ICollection<CommandElement>.Remove(CommandElement item)
+        bool ICollection<ICommandElement>.Remove(ICommandElement item)
         {
             return cmdElements.Remove(item);
         }
-        public IEnumerator<CommandElement> GetEnumerator()
+        public IEnumerator<ICommandElement> GetEnumerator()
         {
             return cmdElements.GetEnumerator();
         }
@@ -423,11 +432,11 @@ namespace Null.ArgsParser
             return result;
         }
     }
-    public class Arguments : CommandElement, CommandElementContainer
+    public class Arguments : ICommandElement, ICommandElementContainer
     {
-        List<CommandElement> cmdElements = new List<CommandElement>();
+        List<ICommandElement> cmdElements = new List<ICommandElement>();
         List<string> strContent = new List<string>();
-        public CommandElement[] Elements { get => cmdElements.ToArray(); }
+        public ICommandElement[] Elements { get => cmdElements.ToArray(); }
 
         public int Count => cmdElements.Count;
         public bool IsReadOnly => false;
@@ -436,13 +445,13 @@ namespace Null.ArgsParser
             get
             {
                 bool ignoreCase = false;
-                foreach (CommandElement element in cmdElements)
+                foreach (ICommandElement element in cmdElements)
                     ignoreCase &= element.IgnoreCase;
                 return ignoreCase;
             }
             set
             {
-                foreach (CommandElement element in cmdElements)
+                foreach (ICommandElement element in cmdElements)
                     element.IgnoreCase = value;
             }
         }
@@ -450,7 +459,7 @@ namespace Null.ArgsParser
         public string[] StringContent { get => strContent.ToArray(); }
 
         public Arguments() { }
-        public Arguments(params CommandElement[] args)
+        public Arguments(params ICommandElement[] args)
         {
             cmdElements.AddRange(args);
         }
@@ -488,7 +497,7 @@ namespace Null.ArgsParser
                     strCntntFieldInfo.SetValue(instance, strContent.ToArray());
             }
 
-            foreach (CommandElement element in cmdElements)
+            foreach (ICommandElement element in cmdElements)
             {
                 element.TryAssign(type, instance);
             }
@@ -496,7 +505,7 @@ namespace Null.ArgsParser
             return true;
         }
 
-        public void Add(CommandElement argv)
+        public void Add(ICommandElement argv)
         {
             cmdElements.Add(argv);
         }
@@ -504,19 +513,19 @@ namespace Null.ArgsParser
         {
             cmdElements.Clear();
         }
-        public bool Contains(CommandElement argv)
+        public bool Contains(ICommandElement argv)
         {
             return cmdElements.Contains(argv);
         }
-        public void CopyTo(CommandElement[] array, int index)
+        public void CopyTo(ICommandElement[] array, int index)
         {
             cmdElements.CopyTo(array, index);
         }
-        bool ICollection<CommandElement>.Remove(CommandElement item)
+        bool ICollection<ICommandElement>.Remove(ICommandElement item)
         {
             return cmdElements.Remove(item);
         }
-        public IEnumerator<CommandElement> GetEnumerator()
+        public IEnumerator<ICommandElement> GetEnumerator()
         {
             return cmdElements.GetEnumerator();
         }

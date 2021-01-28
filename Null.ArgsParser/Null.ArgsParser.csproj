@@ -2,6 +2,19 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Null</Authors>
+    <Description>易于使用的命令行参数分析器</Description>
+    <Company>无</Company>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Copyright>不滥用就彳亍</Copyright>
+    <RepositoryUrl>https://github.com/SlimeNull/Null.ArgsParser</RepositoryUrl>
+    <RepositoryType>GitHub</RepositoryType>
+    <PackageProjectUrl>https://github.com/SlimeNull/Null.ArgsParser</PackageProjectUrl>
+    <PackageLicenseExpression></PackageLicenseExpression>
+    <PackageReleaseNotes>芜湖起飞</PackageReleaseNotes>
+    <Version>1.0.1</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
   </PropertyGroup>
 
 </Project>

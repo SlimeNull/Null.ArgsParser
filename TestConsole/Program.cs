@@ -121,7 +121,7 @@ namespace TestConsole
             Arguments basic = new Arguments(          // 最基础的命令行参数分析器
                 new CommandLine("Help"),                 // 包含Help指令
                 new CommandLine("List",                  // 包含List指令
-                    new FieldArgument("Path", "."))           // List指令中需要Path参数
+                    new FieldArgument("Path", @".\"))         // List指令中需要Path参数, 并且指定了默认值为 ".\"
                         { ElementsIgnoreCase = true },        
                 new CommandLine("Create",                // 包含Create指令
                     new FieldArgument("Filename"))            // Create指令中需要FileName参数
@@ -147,7 +147,7 @@ namespace TestConsole
                     switch(args.ExtraContent[0].ToUpper())
                     {
                         case "LIST":
-                            Console.WriteLine("列举某个目录下的成员: List Path[=.]");
+                            Console.WriteLine(@"列举某个目录下的成员: List Path[=.\]");
                             break;
                         case "HELP":
                             Console.WriteLine("显示帮助手册");
@@ -165,7 +165,8 @@ namespace TestConsole
                 }
                 else
                 {
-                    Console.WriteLine("这是一个示例程序, 用于演示 Null.ArgsParser 的功能");
+                    Console.WriteLine("这是一个示例程序, 用于演示 Null.ArgsParser 的功能" +
+                        "\n    支持 List, Help, Create, Delete 指令, 使用 'Help 指令' 以查看详细内容");
                 }
             }
             else if (args.List)                    // 表示调用 List
@@ -205,7 +206,7 @@ namespace TestConsole
             }
             else
             {
-                Console.WriteLine("没有进行任何操作?");
+                Console.WriteLine("没有进行任何支持的操作? 使用 help 查看帮助手册");
             }
 
 
