@@ -261,6 +261,7 @@ namespace Null.ArgsParser
     }
     public class StringArgument : INamedArgument
     {
+        bool parsed = false;
         bool assignable = false;
         string name;
         string value;
@@ -312,7 +313,7 @@ namespace Null.ArgsParser
 
         public  bool TryParse(ref string[] args, ref int index)
         {
-            if (assignable)
+            if (assignable && parsed)
                 return false;
 
             if (index < args.Length)
@@ -321,7 +322,7 @@ namespace Null.ArgsParser
                 return false;
 
             index++;
-            return true;
+            return parsed = true;
         }
     }
     public class CommandLine : INamedArgument, ICaseIgnorableArgument, ICommandElementContainer
