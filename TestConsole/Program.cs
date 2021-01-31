@@ -121,13 +121,13 @@ namespace TestConsole
             Arguments basic = new Arguments(          // 最基础的命令行参数分析器
                 new CommandLine("Help"),                 // 包含Help指令
                 new CommandLine("List",                  // 包含List指令
-                    new FieldArgument("Path", @".\"))         // List指令中需要Path参数, 并且指定了默认值为 ".\"
+                    new StringArgument("Path", @".\"))         // List指令中需要Path参数, 并且指定了默认值为 ".\"
                         { ElementsIgnoreCase = true },        
                 new CommandLine("Create",                // 包含Create指令
-                    new FieldArgument("Filename"))            // Create指令中需要FileName参数
+                    new StringArgument("Filename"))            // Create指令中需要FileName参数
                         { ElementsIgnoreCase = true},         
                 new CommandLine("Delete",                // 包含Delete指令
-                    new FieldArgument("Filename"))          // Delete指令中需要FileName参数
+                    new StringArgument("Filename"))          // Delete指令中需要FileName参数
                         { ElementsIgnoreCase = true}
                 )
             { IgnoreCase = true };                      // 忽略大小写
