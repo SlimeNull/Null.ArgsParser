@@ -437,11 +437,6 @@ namespace Null.ArgsParser
                     {
                         fieldInfo.SetValue(instance, enabled);
 
-                        if (strCntntFieldInfo.FieldType.IsAssignableFrom(typeof(List<string>)))
-                            strCntntFieldInfo.SetValue(instance, strContent);
-                        else if (typeof(string[]) == strCntntFieldInfo.FieldType)
-                            strCntntFieldInfo.SetValue(instance, strContent.ToArray());
-
                         foreach (ICommandElement element in cmdElements)
                         {
                             element.TryAssign(type, instance);
@@ -449,6 +444,13 @@ namespace Null.ArgsParser
 
                         return true;
                     }
+                }
+                if (strCntntFieldInfo != null)
+                {
+                    if (strCntntFieldInfo.FieldType.IsAssignableFrom(typeof(List<string>)))
+                        strCntntFieldInfo.SetValue(instance, strContent);
+                    else if (typeof(string[]) == strCntntFieldInfo.FieldType)
+                        strCntntFieldInfo.SetValue(instance, strContent.ToArray());
                 }
             }
 
