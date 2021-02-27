@@ -138,11 +138,26 @@ namespace TestConsole
         }
         class temp
         {
-            public string qwq;
+            public string Atlas = "";
+            public string Source = "";
+            public string Output = "";
+            public string Format = "*directory*/*name**extension*";    // name extension size width height year month day hour minute second
+            public bool Strict = false;
+            public bool Rename = false;
+
+            public string InfoSource = "";
         }
         static void Main(string[] sysargs)
         {
-            var qwq = new Arguments(new StringArgument("qwq"));
+            Arguments qwq = new Arguments(
+                new FieldArgument("Atlas"),
+                new FieldArgument("Source"),
+                new FieldArgument("Output"),
+                new SwitchArgument("Strict"),
+                new SwitchArgument("Rename"),
+                new StringArgument("InfoSource"))
+            { IgnoreCase = true, };
+
             qwq.Parse(sysargs);
             var qwqObj = qwq.ToObject<temp>();
 

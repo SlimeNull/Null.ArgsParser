@@ -156,10 +156,9 @@ namespace Null.ArgsParser
         {
             if (IsTriggered(args[index]))
             {
-                index++;
-                if (index < args.Length)
+                if (index + 1 < args.Length)
                 {
-                    this.Value = args[index];
+                    this.Value = args[++index];      // 包含 index + 1 的操作
 
                     index++;
                     return true;
@@ -317,12 +316,12 @@ namespace Null.ArgsParser
                 return false;
 
             if (index < args.Length)
-                value = args[index];
+                Value = args[index];
             else
                 return false;
 
             index++;
-            return assignable = parsed = true;
+            return parsed = true;
         }
     }
     public class CommandLine : INamedArgument, ICaseIgnorableArgument, ICommandElementContainer
@@ -407,16 +406,21 @@ namespace Null.ArgsParser
                 enabled = true;
 
                 bool parsed;
-                for (; index < args.Length; index++)
+                for (; index < args.Length;)
                 {
                     parsed = false;
                     for (int j = 0; j < cmdElements.Count && index < args.Length; j++)
                     {
-                        parsed |= cmdElements[j].TryParse(ref args, ref index);
+                        bool thisParsed = cmdElements[j].TryParse(ref args, ref index);
+                        parsed |= thisParsed;
+
+                        if (thisParsed)
+                            break;
                     }
                     if (!parsed)
                     {
                         strContent.Add(args[index]);
+                        index++;
                     }
                 }
 
@@ -545,16 +549,21 @@ namespace Null.ArgsParser
         public bool TryParse(ref string[] args, ref int index)
         {
             bool parsed;
-            for (; index < args.Length; index++)
+            for (; index < args.Length;)
             {
                 parsed = false;
                 for (int j = 0; j < cmdElements.Count && index < args.Length; j++)
                 {
-                    parsed |= cmdElements[j].TryParse(ref args, ref index);
+                    bool thisParsed = cmdElements[j].TryParse(ref args, ref index);
+                    parsed |= thisParsed;
+
+                    if (thisParsed)
+                        break;
                 }
                 if (!parsed)
                 {
                     strContent.Add(args[index]);
+                    index++;
                 }
             }
 
