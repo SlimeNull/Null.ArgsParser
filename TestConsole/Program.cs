@@ -136,8 +136,17 @@ namespace TestConsole
 
             return basic.ToObject<StartupArgs>();       // 返回类的实例
         }
-        static void Main()
+        class temp
         {
+            public string qwq;
+        }
+        static void Main(string[] sysargs)
+        {
+            var qwq = new Arguments(new StringArgument("qwq"));
+            qwq.Parse(sysargs);
+            var qwqObj = qwq.ToObject<temp>();
+
+
             StartupArgs args = Initialize();
 
             if (args.Help)               // 表示参数中想要调用 Help 指令

@@ -322,7 +322,7 @@ namespace Null.ArgsParser
                 return false;
 
             index++;
-            return parsed = true;
+            return assignable = parsed = true;
         }
     }
     public class CommandLine : INamedArgument, ICaseIgnorableArgument, ICommandElementContainer
