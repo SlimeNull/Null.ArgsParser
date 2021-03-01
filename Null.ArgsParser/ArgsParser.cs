@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace Null.ArgsParser
@@ -359,22 +360,19 @@ namespace Null.ArgsParser
                         (element as ICaseIgnorableArgument).IgnoreCase = value;
             }
         }
-        public  bool IgnoreCase
+        public bool IgnoreCase
         {
             get
             {
-                bool ignoreCase = selfIgnoreCase;
-                foreach (ICommandElement element in cmdElements)
-                    if (typeof(ICaseIgnorableArgument).IsAssignableFrom(element.GetType()))
-                        ignoreCase &= (element as ICaseIgnorableArgument).IgnoreCase;
+                bool ignoreCase = true;
+                foreach (ICaseIgnorableArgument argv in cmdElements.OfType<ICaseIgnorableArgument>())
+                    ignoreCase &= argv.IgnoreCase;
                 return ignoreCase;
             }
             set
             {
-                foreach (ICommandElement element in cmdElements)
-                    if (typeof(ICaseIgnorableArgument).IsAssignableFrom(element.GetType()))
-                        (element as ICaseIgnorableArgument).IgnoreCase = value;
-                selfIgnoreCase = value;
+                foreach (ICaseIgnorableArgument argv in cmdElements.OfType<ICaseIgnorableArgument>())
+                    argv.IgnoreCase = value;
             }
         }
 
@@ -520,17 +518,15 @@ namespace Null.ArgsParser
         {
             get
             {
-                bool ignoreCase = false;
-                foreach (ICommandElement element in cmdElements)
-                    if (typeof(ICaseIgnorableArgument).IsAssignableFrom(element.GetType()))
-                        ignoreCase &= (element as ICaseIgnorableArgument).IgnoreCase;
+                bool ignoreCase = true;
+                foreach (ICaseIgnorableArgument argv in cmdElements.OfType<ICaseIgnorableArgument>())
+                    ignoreCase &= argv.IgnoreCase;
                 return ignoreCase;
             }
             set
             {
-                foreach (ICommandElement element in cmdElements)
-                    if (typeof(ICaseIgnorableArgument).IsAssignableFrom(element.GetType()))
-                        (element as ICaseIgnorableArgument).IgnoreCase = value;
+                foreach (ICaseIgnorableArgument argv in cmdElements.OfType<ICaseIgnorableArgument>())
+                    argv.IgnoreCase = value;
             }
         }
         public string ExContentName { get; set; } = "ExtraContent";
